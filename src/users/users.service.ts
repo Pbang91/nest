@@ -11,7 +11,11 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
-  constructor(private emailService: EmailService, @InjectRepository(UserEntity) private usersRepository: Repository<UserEntity>){}
+  constructor(
+    private emailService: EmailService,
+    @InjectRepository(UserEntity)
+    private usersRepository: Repository<UserEntity>
+    ){}
   
   async create(createUserDto: CreateUserDto) {
     const {name, email, password} = createUserDto;
@@ -55,7 +59,7 @@ export class UsersService {
 
     throw new Error('Method not implemented');
   }
-  //TODO DB연동 후 구현
+  
   private async checkUserExists(email: string) {
     const user = await this.usersRepository.findOne({
       where: { email: email }
@@ -63,7 +67,7 @@ export class UsersService {
 
     return user !== undefined;
   }
-  //TODO DB연동 후 구현
+  
   private async saveUser(name: string, email: string, password: string, signupVerifyToken: string) {
     const user = new UserEntity();
 
