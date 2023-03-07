@@ -5,11 +5,11 @@ import { UsersModule } from './users/users.module';
 import { EmailService } from './email/email.service';
 import { ConfigModule } from '@nestjs/config';
 import emailConfig from './config/emailConfig';
+import authConfig from './config/authConfig';
 import { validationSchema } from './config/validationSchema';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerMiddleWare } from './logger.middleware';
 import { UsersController } from './users/users.controller';
-import authConfig from './config/authConfig';
 
 @Module({
   imports: [
