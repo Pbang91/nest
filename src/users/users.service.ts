@@ -1,21 +1,22 @@
 import * as uuid from 'uuid';
 
-import { Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnprocessableEntityException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EmailService } from './../email/email.service';
 import { UserLoginDto } from './dto/login-user.dto';
 import { UserInfo } from './UserIfno';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
   constructor(
     private emailService: EmailService,
     @InjectRepository(UserEntity)
-    private usersRepository: Repository<UserEntity>
-    ){}
+    private usersRepository: Repository<UserEntity>,
+    private dataSource: DataSource,
+    ){ }
   
   async create(createUserDto: CreateUserDto) {
     const {name, email, password} = createUserDto;
@@ -76,18 +77,38 @@ export class UsersService {
       where: { email: email }
     });
 
-    return user !== undefined;
+    if ( user === null ) {
+      return true
+    } else {
+      return false
+    }
   }
   
   private async saveUser(name: string, email: string, password: string, signupVerifyToken: string) {
-    const user = new UserEntity();
+    const queryRunner = this.dataSource.createQueryRunner();
 
-    user.name = name;
-    user.email = email;
-    user.password = password;
-    user.signupVerifyToken = signupVerifyToken;
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    await this.usersRepository.save(user)
+    try {
+      const user = new UserEntity();
+
+      user.name = name;
+      user.email = email;
+      user.password = password;
+      user.signupVerifyToken = signupVerifyToken;
+
+      await queryRunner.manager.save(user);
+      throw new InternalServerErrorException(); //트랜잭션 확인
+
+      await queryRunner.commitTransaction();
+    } catch(e) {
+      // 에러가 발생하면 롤백
+      await queryRunner.rollbackTransaction();
+    } finally {
+      // 직접 생성한 QueryRunner는 해제
+      await queryRunner.release();
+    }
   }
   //TODO DB연동 후 구현
   private async sendMemberJoinEmail(email: string, signupVerifyToken: string) {
