@@ -1,4 +1,5 @@
-import * as jwt from 'jsonwebtoken'
+import * as jwt from 'jsonwebtoken';
+import * as bcrypt from 'bcrypt';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import authConfig from 'src/config/authConfig';
 import { ConfigType } from '@nestjs/config';
@@ -30,8 +31,22 @@ export class AuthService {
                 userId: id,
                 email
             }  
-        } catch(e) {
+        } catch (e) {
             throw new UnauthorizedException()
         }
+    }
+
+    async validatePassword(password: string, hashedPassword: string){
+        const validateResult = await bcrypt.compare(password, hashedPassword)
+
+        
+
+        return validateResult
+    }
+
+    async transformPassword(password: string) {
+        const hashedPassword = await bcrypt.hash(password, 10,);
+
+        return hashedPassword
     }
 }
