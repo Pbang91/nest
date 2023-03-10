@@ -31,7 +31,7 @@ export class UsersController {
 
   @UseGuards(AuthGuard)
   @Get(':id')
-  async getUSerInfo(@Headers() headers: any, @Param('id') id: number): Promise<UserInfo> {
+  async getUSerInfo(@Param('id') id: number): Promise<UserInfo> {
     if(+id < 1) {
       throw new BadRequestException('id는 0보다 커야 합니다.');
     }

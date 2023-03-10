@@ -39,8 +39,6 @@ export class AuthService {
     async validatePassword(password: string, hashedPassword: string){
         const validateResult = await bcrypt.compare(password, hashedPassword)
 
-        
-
         return validateResult
     }
 

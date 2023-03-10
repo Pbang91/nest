@@ -61,12 +61,8 @@ export class UsersService {
 
     const validateResult = await this.authService.validatePassword(password, user.password)
 
-    if (!user || !validateResult) {
+    if (!user || validateResult) {
       throw new UnauthorizedException('유저 정보가 올바르지 않습니다.')
-    }
-
-    if(!user) {
-      throw new NotFoundException('유저가 존재하지 않습니다.')
     }
 
     return this.authService.login({
